@@ -90,8 +90,17 @@ export default function Cart() {
   const items = useSelector(state => state.cart.items)
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const { products, loading } = useProducts()
+  const { user } = useSelector(state => state.auth)
   const [email, setEmail] = useState('')
   const carouselRef = useRef(null)
+
+  const handleCheckout = () => {
+    if (!user) {
+      navigate('/login?redirect=cart&message=Please sign in to checkout')
+      return
+    }
+    alert('Checkout not implemented yet')
+  }
 
   const handleAddToCart = (p) => dispatch(addToCart(p))
   const handleBuyNow = (p) => { dispatch(addToCart(p)); navigate('/cart') }
@@ -254,6 +263,7 @@ export default function Cart() {
             </div>
 
             <button
+              onClick={handleCheckout}
               className="w-full font-semibold cursor-pointer rounded-md transition-colors duration-150"
               style={{
                 height: 46,
@@ -265,7 +275,7 @@ export default function Cart() {
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#CC2200' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#111' }}
             >
-              Proceed to Checkout
+              {user ? 'Proceed to Checkout' : 'Sign in to Checkout'}
             </button>
 
             <div className="flex items-center justify-center gap-4 mt-4 text-[11px] text-gray-400">

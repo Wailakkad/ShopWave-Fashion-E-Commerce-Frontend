@@ -1,23 +1,31 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import products from '../data/products'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../store/authSlice'
+import { fetchProducts } from '../services/api'
 
 export default function Navbar() {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const location = useLocation()
   const cartCount = useSelector(
     state => state.cart.items.reduce((sum, i) => sum + i.quantity, 0)
   )
+  const { user } = useSelector(state => state.auth)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [allProducts, setAllProducts] = useState([])
   const searchRef = useRef(null)
   const inputRef = useRef(null)
 
+  useEffect(() => {
+    fetchProducts().then(setAllProducts).catch(() => {})
+  }, [])
+
   const results = query.trim()
-    ? products.filter(p =>
+    ? allProducts.filter(p =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase())
       )
@@ -88,9 +96,11 @@ export default function Navbar() {
               </span>
             )}
           </Link>
-          <svg className="w-5 h-5 text-gray-600 cursor-pointer hover:text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
+          {user ? (
+            <Link to="/profile" className="text-gray-600 text-sm font-normal tracking-[0.05em] hover:text-black transition-colors">{user.name}</Link>
+          ) : (
+            <Link to="/login" className="text-gray-600 text-sm font-normal tracking-[0.05em] hover:text-black transition-colors">Sign In</Link>
+          )}
         </div>
 
         {/* Right side — mobile/tablet */}
@@ -243,6 +253,23 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+            {user ? (
+              <Link
+                to="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="text-white text-3xl font-bold py-4 hover:text-gray-300 transition-colors"
+              >
+                Profile
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-white text-3xl font-bold py-4 hover:text-gray-300 transition-colors"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Bottom icons */}
@@ -252,9 +279,11 @@ export default function Navbar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </Link>
-            <svg className="w-5 h-5 text-white/80 cursor-pointer hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>

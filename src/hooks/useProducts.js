@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react'
-import products from '../data/products'
+import { fetchProducts } from '../services/api'
 
 export default function useProducts() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setData(products)
-      setLoading(false)
-    }, 300)
-    return () => clearTimeout(timer)
+    fetchProducts()
+      .then(setData)
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
   }, [])
-
   return { products: data, loading }
 }

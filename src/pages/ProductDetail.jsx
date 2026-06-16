@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { addToCart } from '../store/cartSlice'
-import useProducts from '../hooks/useProducts'
+import { fetchProductById, fetchProducts } from '../services/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const ratings = [4.5, 5, 4, 3.5, 5, 4, 4.5, 3]
@@ -87,13 +87,27 @@ export default function ProductDetail() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { products, loading } = useProducts()
+  const [product, setProduct] = useState(null)
+  const [related, setRelated] = useState([])
+  const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const carouselRef = useRef(null)
 
-  if (loading) return <LoadingSpinner />
+  useEffect(() => {
+    setLoading(true)
+    Promise.all([
+      fetchProductById(id),
+      fetchProducts()
+    ])
+      .then(([single, all]) => {
+        setProduct(single)
+        setRelated(all.filter(p => p.category === single.category && p.id !== single.id))
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [id])
 
-  const product = products.find(p => p.id === Number(id))
+  if (loading) return <LoadingSpinner />
 
   if (!product) {
     return (
@@ -107,7 +121,6 @@ export default function ProductDetail() {
   }
 
   const rating = ratings[product.id % ratings.length]
-  const related = products.filter(p => p.category === product.category && p.id !== product.id)
   const handleAddToCart = (p) => dispatch(addToCart(p))
   const handleBuyNow = (p) => { dispatch(addToCart(p)); navigate('/cart') }
 
