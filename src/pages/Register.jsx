@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { register, clearError } from '../store/authSlice'
+import { syncCartAfterLogin } from '../store/cartSlice'
 
 export default function Register() {
   const dispatch = useDispatch()
@@ -19,9 +20,12 @@ export default function Register() {
     dispatch(clearError())
   }, [dispatch])
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
-    dispatch(register({ name, email, password }))
+    const result = await dispatch(register({ name, email, password }))
+    if (result.meta.requestStatus === 'fulfilled') {
+      dispatch(syncCartAfterLogin())
+    }
   }
 
   return (

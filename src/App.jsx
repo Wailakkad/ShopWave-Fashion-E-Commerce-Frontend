@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUser } from './store/authSlice'
+import { fetchCart } from './store/cartSlice'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Products from './pages/Products'
@@ -14,11 +15,17 @@ import NotFound from './pages/NotFound'
 
 export default function App() {
   const dispatch = useDispatch()
-  const { initialLoading } = useSelector(state => state.auth)
+  const { user, initialLoading } = useSelector(state => state.auth)
 
   useEffect(() => {
     dispatch(loadUser())
   }, [dispatch])
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchCart())
+    }
+  }, [user, dispatch])
 
   if (initialLoading) return null
 
