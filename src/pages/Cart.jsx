@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { clearCart } from '../store/cartSlice'
-import { addToCart } from '../store/cartSlice'
+import { clearCart, addToCart } from '../store/cartSlice'
 import CartItem from '../components/CartItem'
 import useProducts from '../hooks/useProducts'
+import { subscribeApi } from '../services/newsletterService'
 
 const ratings = [4.5, 5, 4, 3.5, 5, 4, 4.5, 3]
 
@@ -96,10 +96,10 @@ export default function Cart() {
 
   const handleCheckout = () => {
     if (!user) {
-      navigate('/login?redirect=cart&message=Please sign in to checkout')
+      navigate('/login?redirect=checkout&message=Please sign in to checkout')
       return
     }
-    alert('Checkout not implemented yet')
+    navigate('/checkout')
   }
 
   const handleAddToCart = (p) => dispatch(addToCart(p))
@@ -366,7 +366,7 @@ export default function Cart() {
                 style={{ height: 44, padding: '0 16px', border: 'none', borderRadius: '6px 0 0 6px' }}
               />
               <button
-                onClick={() => { if (email) { alert(`Subscribed: ${email}`); setEmail('') } }}
+                onClick={async () => { if (!email) return; try { await subscribeApi(email); setEmail(''); alert('Subscribed successfully!') } catch (err) { alert(err.message) } }}
                 className="font-semibold text-sm cursor-pointer transition-opacity hover:opacity-90 flex-shrink-0"
                 style={{ height: 44, padding: '0 20px', backgroundColor: '#CC2200', color: 'white', borderRadius: '0 6px 6px 0', border: 'none' }}
               >

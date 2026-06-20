@@ -5,6 +5,7 @@ import { addToCart } from '../store/cartSlice'
 import { motion } from 'framer-motion'
 import useProducts from '../hooks/useProducts'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { subscribeApi } from '../services/newsletterService'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 50 },
@@ -617,10 +618,14 @@ export default function Home() {
               }}
             />
             <motion.button
-              onClick={() => {
-                if (email) {
-                  alert(`Subscribed with: ${email}`)
+              onClick={async () => {
+                if (!email) return
+                try {
+                  await subscribeApi(email)
                   setEmail('')
+                  alert('Subscribed successfully!')
+                } catch (err) {
+                  alert(err.message)
                 }
               }}
               className="w-full rounded-full text-white text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity mt-3"
